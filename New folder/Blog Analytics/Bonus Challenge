@@ -1,0 +1,16 @@
+const memoizedAnalytics = _.memoize(async () => {
+  // Perform analytics logic here
+  // ...
+
+  return analyticsData;
+}, (query) => query);
+
+// Middleware for fetching and analyzing blog data with caching
+app.get('/api/blog-stats', async (req, res) => {
+  try {
+    const analyticsData = await memoizedAnalytics(req.query.query);
+    res.json(analyticsData);
+  } catch (error) {
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+});

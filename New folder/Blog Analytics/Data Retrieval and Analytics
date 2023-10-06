@@ -1,0 +1,63 @@
+
+const express = require('express');
+const axios = require('axios');
+const _ = require('lodash');
+
+const app = express();
+const API_URL = 'https://intent-kit-16.hasura.app/api/rest/blogs';
+const HASURA_ADMIN_SECRET = '32qR4KmXOIpsGPQKMqEJHGJS27G5s7HdSKO3gdtQd2kv5e852SiYwWNfxkZOBuQ6';
+
+// Middleware for fetching and analyzing blog data
+app.get('/api/blog-stats', async (req, res) => {
+  try {
+    const response = await axios.get(API_URL, {
+      headers: {
+        'x-hasura-admin-secret': HASURA_ADMIN_SECRET,
+      },
+    });
+
+    const blogs = response.data;
+
+    // Calculate analytics
+    const totalBlogs = blogs.length;
+    const longestBlog = _.maxBy(blogs, 'title.length');
+    const blogsWithPrivacy = _.filter(blogs, (blog) =>
+      blog.title.toLowerCase().includes('privacy')
+    );
+    const uniqueBlogTitles = _.uniqBy(blogs, 'title').map((blog) => blog.title);
+
+    const analyticsData = {
+      totalBlogs,
+      longestBlog: longestBlog.title,
+      blogsWithPrivacy: blogsWithPrivacy.length,
+      uniqueBlogTitles,
+    };
+
+    res.json(analyticsData);
+  } catch (error) {
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+});
+
+// Blog search endpoint
+app.get('/api/blog-search', (req, res) => {
+  const query = req.query.query.toLowerCase();
+
+  // Fetch and filter blogs based on the query string
+  // Implement your own logic for filtering blogs (original implementation)
+  // ...
+
+  // Respond with search results
+  res.json(searchResults);
+});
+
+// Error handling middleware
+app.use((err, req, res, next) => {
+  console.error(err.stack);
+  res.status(500).json({ error: 'Internal Server Error' });
+});
+
+const PORT = 3000;
+app.listen(PORT, () => {
+  console.log(`Server is running on port ${PORT}`);
+});
